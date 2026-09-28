@@ -41,7 +41,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install Linux system dependencies
         if: matrix.platform == 'ubuntu-22.04'
@@ -58,7 +57,7 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - name: Install project dependencies
-        run: npm ci || npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build web application
         run: npm run build
@@ -95,7 +94,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Setup Java JDK
         uses: actions/setup-java@v4
@@ -107,7 +105,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build web assets
         run: npm run build
@@ -145,10 +143,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build web assets
         run: npm run build
