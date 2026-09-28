@@ -105,9 +105,13 @@ jobs:
           distribution: 'zulu'
           java-version: 17
 
-      - name: Accept Android SDK licenses
+      - name: Setup Android SDK platform and licenses
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          SDKMANAGER=$(which sdkmanager || find $ANDROID_HOME/cmdline-tools -name sdkmanager 2>/dev/null | head -n 1)
+          if [ -n "$SDKMANAGER" ]; then
+            yes | $SDKMANAGER --licenses || true
+            $SDKMANAGER --install "platforms;android-36" || true
+          fi
 
       - name: Install dependencies
         run: |
@@ -176,3 +180,36 @@ jobs:
           name: CSB-iOS-Xcode-Project
           path: CSB-iOS-Xcode-Project.tar.gz
           if-no-files-found: warn
+
+  # -------------------------------------------------------------
+  # 4. Publish to GitHub Releases Page
+  # -------------------------------------------------------------
+  publish-release:
+    needs: [build-desktop, build-android, build-ios]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Organize release files
+        run: |
+          mkdir -p release-files
+          find release-artifacts -type f \( -name "*.exe" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.dmg" -o -name "*.apk" -o -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release-files/ \;
+          echo "Release files to publish:"
+          ls -lh release-files/
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-files/*
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && format('Crafters Smart Bible {0}', github.ref_name) || 'Crafters Smart Bible v1.0.0' }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
