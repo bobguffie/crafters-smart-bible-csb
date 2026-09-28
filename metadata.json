@@ -1,0 +1,8 @@
+{
+  "name": "Crafters Smart Bible (CSB)",
+  "description": "A retro Rolodex flip-style craft settings and workshop timer database for Sublimation, 3D Printing, Laser Cutting, and more.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
