@@ -58,7 +58,7 @@ jobs:
         run: npm run build
 
       - name: Build Desktop Application (Tauri CLI)
-        run: npx tauri build
+        run: npx tauri build --ci --verbose --no-sign
 
       - name: Upload Desktop Artifacts
         uses: actions/upload-artifact@v4
@@ -74,6 +74,7 @@ jobs:
             src-tauri/target/release/*.exe
             src-tauri/target/release/*.AppImage
             src-tauri/target/release/*.dmg
+            src-tauri/target/release/crafters-smart-bible*
           if-no-files-found: warn
 
   # -------------------------------------------------------------
@@ -145,16 +146,17 @@ jobs:
       - name: Build web assets
         run: npm run build
 
-      - name: Capacitor Sync iOS
+      - name: Capacitor Setup iOS
         run: |
           npx cap add ios || true
           npx cap copy ios || true
           mkdir -p ios
           echo "Open App.xcodeproj in Xcode on macOS to build and sign for iOS device or simulator." > ios/README.txt
+          tar -czf CSB-iOS-Xcode-Project.tar.gz ios/
 
       - name: Upload iOS Xcode Project Artifact
         uses: actions/upload-artifact@v4
         with:
           name: CSB-iOS-Xcode-Project
-          path: ios/
+          path: CSB-iOS-Xcode-Project.tar.gz
           if-no-files-found: warn
